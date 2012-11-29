@@ -39,15 +39,22 @@ import android.os.AsyncTask;
 public class AdBlockersDetector
 {
 
+	/**
+	 *  Asynchronous callback
+	 */
 	public static interface Callback
 	{
 		/**
 		 * Called in the GUI thread when result is available.
 		 * @param adBlockFound true if an ad blocker is installed.
+		 * @param info on detected ad blocker.
 		 */
-		public void onResult(boolean adBlockerFound);
+		public void onResult(boolean adBlockerFound, Info info);
 	}
 
+	/**
+	 *  Detection method
+	 */
 	public static enum Method
 	{
 		/** Not found */
@@ -60,13 +67,15 @@ public class AdBlockersDetector
 		BY_HOST_RESOLUTION;
 	}
 	
-	/** Give information on how ad blocker was detected */
+	/** 
+	 *  Give information on how ad blocker was detected 
+	 */
 	public static class Info
 	{
 		/** The used method */
-		Method method;
+		public Method method;
 		/** Details, depending on method */
-		String details;
+		public String details;
 	}
 
 
@@ -83,22 +92,11 @@ public class AdBlockersDetector
 	/**
 	 * Asynchronous ad-blockers detection.
 	 * Callback is called in GUI thread.
-	 * @param info if not null, it will be filled.
-	 * @param callback
-	 */
-	public void detectAdBlockers(Info info, Callback callback)
-	{
-		new DetectTask(callback, info).execute();
-	}
-
-	/**
-	 * Asynchronous ad-blockers detection.
-	 * Callback is called in GUI thread.
 	 * @param callback
 	 */
 	public void detectAdBlockers(Callback callback)
 	{
-		detectAdBlockers(null, callback);
+		new DetectTask(callback).execute();
 	}
 	
 	/**
@@ -206,7 +204,9 @@ public class AdBlockersDetector
 	private boolean detectAppNames(Info info)
 	{
 		if(context != null)
+		{
 			for(final String app : BLOCKERS_APP_NAMES)
+			{
 				if(isAppInstalled(app))
 				{
 					if(info != null)
@@ -216,6 +216,8 @@ public class AdBlockersDetector
 					}
 					return true;
 				}
+			}
+		}
 		return false;
 	}
 	
@@ -259,15 +261,15 @@ public class AdBlockersDetector
 		private WeakReference<Callback> callback;
 		private Info info;
 		
-		public DetectTask(Callback c, Info inf)
+		public DetectTask(Callback c)
 		{
 			callback = new WeakReference<Callback>(c);
-			info = inf;
 		}
 
 		@Override
 		protected Boolean doInBackground(Void... params)
 		{
+			info = new Info();
 			return detectAdBlockers(info);
 		}
 		
@@ -276,7 +278,7 @@ public class AdBlockersDetector
 		{
 			final Callback c = callback.get();
 			if(c != null && r != null)
-				c.onResult(r);
+				c.onResult(r, info);
 		}
 		
 	}

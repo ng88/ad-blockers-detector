@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="quit">Quit</string>
+    <string name="buy">Buy</string>
+    <string name="contact_us">Contact us</string>
+ 
+    <string name="contact_default_msg">I don\'t understand why I get this message.</string>
+    
+    <string name="dlg_title">Ad blocker detection</string>
+    <string name="dlg_default_text"><![CDATA[
+        An <b>ad blocker</b> has been detected on your device.<br>
+        If you don\'t understand why you get this message, please feel free to contact us.<br>
+        <br>
+        Development of this application is supported by advertising, so please uninstall your ad blocker in order to use it.<br>
+        <br>   
+    ]]></string>
+    <string name="dlg_default_text_buy"><![CDATA[
+        Alternatively, please click on the <b>Buy</b> button to use this application without ads.
+    ]]></string>
+    
+</resources>
