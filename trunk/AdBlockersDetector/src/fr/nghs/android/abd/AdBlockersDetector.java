@@ -25,6 +25,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.net.InetAddress;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -47,17 +48,49 @@ public class AdBlockersDetector
 		public void onResult(boolean adBlockerFound);
 	}
 
+	public static enum Method
+	{
+		/** Not found */
+		NONE,
+		/** Detected by reading host file */
+		BY_HOSTS_FILE,
+		/** Detected by installed app names */
+		BY_APP_NAME,
+		/** Detected by resolving host names */
+		BY_HOST_RESOLUTION;
+	}
+	
+	/** Give information on how ad blocker was detected */
+	public static class Info
+	{
+		/** The used method */
+		Method method;
+		/** Details, depending on method */
+		String details;
+	}
 
-	private Context context;
+
+	private WeakReference<Context> context;
 	
 	/**
 	 * @param c c can be null, in this case the method using package name is not used.
 	 */
 	public AdBlockersDetector(Context c)
 	{
-		context = c;
+		context = new WeakReference<Context>(c);
 	}
 	
+	/**
+	 * Asynchronous ad-blockers detection.
+	 * Callback is called in GUI thread.
+	 * @param info if not null, it will be filled.
+	 * @param callback
+	 */
+	public void detectAdBlockers(Info info, Callback callback)
+	{
+		new DetectTask(callback, info).execute();
+	}
+
 	/**
 	 * Asynchronous ad-blockers detection.
 	 * Callback is called in GUI thread.
@@ -65,23 +98,40 @@ public class AdBlockersDetector
 	 */
 	public void detectAdBlockers(Callback callback)
 	{
-		new DetectTask(callback).execute();
+		detectAdBlockers(null, callback);
 	}
 	
 	/**
 	 * Synchronous ad-blockers detection
 	 * This is blocking and should be called in a separated thread.
-	 * In Android activies, prefer the asynchronous version.
-	 * @return
+	 * In Android activities, prefer the asynchronous version.
+	 * @param info if not null, it will be filled.
+	 * @return true if an ad-blocker is detected
+	 */
+	public boolean detectAdBlockers(Info info)
+	{
+		if(info != null)
+		{
+			info.method = Method.NONE;
+			info.details = "";
+		}
+		return  detectAppNames(info) ||
+				detectHostName(info) ||
+				detectInHostFile(info);
+	}
+	
+	/**
+	 * Synchronous ad-blockers detection
+	 * This is blocking and should be called in a separated thread.
+	 * In Android activities, prefer the asynchronous version.
+	 * @return true if an adblocker is detected
 	 */
 	public boolean detectAdBlockers()
 	{
-		return detectInHostFile() ||
-				detectAppNames() ||
-				detectHostName();
+		return detectAdBlockers((Info)null);
 	}
 	
-	private boolean detectInHostFile()
+	private boolean detectInHostFile(Info info)
 	{
 		final File host = new File(HOST_FILE);
 		if(host.canRead())
@@ -94,7 +144,14 @@ public class AdBlockersDetector
 				while( (ln = in.readLine()) != null )
 				{
 					if(ln.contains(HOST_AD_PATTERN))
+					{
+						if(info != null)
+						{
+							info.method = Method.BY_HOSTS_FILE;
+							info.details = ln;
+						}
 						return true;
+					}
 				}
 			}
 			catch(Exception e)
@@ -114,35 +171,51 @@ public class AdBlockersDetector
 		return false;
 	}
 
-	private boolean detectHostName()
+	private boolean detectHostName(Info info)
 	{
 		for(final String h : HOSTS)
-			if(isLocalHost(h))
+		{
+			final String addr = isLocalHost(h);
+			if(addr != null)
+			{
+				if(info != null)
+				{
+					info.method = Method.BY_HOST_RESOLUTION;
+					info.details = h + " => " + addr;
+				}
 				return true;
+			}
+		}
 		return false;
 	}
 	
-	private boolean isLocalHost(String hostName)
+	private String isLocalHost(String hostName)
 	{
 		try
 		{
 			final InetAddress a = InetAddress.getByName(hostName);
-			return a.isAnyLocalAddress() ||
-					a.isLinkLocalAddress() ||
-					a.isLoopbackAddress();
+			if(a.isAnyLocalAddress() || a.isLinkLocalAddress() || a.isLoopbackAddress())
+				return a.getHostAddress();
 		}
 		catch(Exception ex)
 		{
-			return false;
 		}
+		return null;
 	}
 	
-	private boolean detectAppNames()
+	private boolean detectAppNames(Info info)
 	{
 		if(context != null)
 			for(final String app : BLOCKERS_APP_NAMES)
 				if(isAppInstalled(app))
+				{
+					if(info != null)
+					{
+						info.method = Method.BY_APP_NAME;
+						info.details = app;
+					}
 					return true;
+				}
 		return false;
 	}
 	
@@ -150,8 +223,8 @@ public class AdBlockersDetector
 	{
 		try
 		{
-			final PackageManager pm = context.getPackageManager();
-			return pm.getPackageInfo(packageName, PackageManager.GET_ACTIVITIES) != null;
+			final Context c = context.get();
+			return (c != null) && (c.getPackageManager().getPackageInfo(packageName, PackageManager.GET_ACTIVITIES) != null);
 		}
 		catch(Exception e) // PackageManager.NameNotFoundException
 		{
@@ -183,24 +256,27 @@ public class AdBlockersDetector
 	private class DetectTask extends AsyncTask<Void, Void, Boolean>
 	{
 		
-		private Callback callback;
+		private WeakReference<Callback> callback;
+		private Info info;
 		
-		public DetectTask(Callback c)
+		public DetectTask(Callback c, Info inf)
 		{
-			callback = c;
+			callback = new WeakReference<Callback>(c);
+			info = inf;
 		}
 
 		@Override
 		protected Boolean doInBackground(Void... params)
 		{
-			return detectAdBlockers();
+			return detectAdBlockers(info);
 		}
 		
 		@Override
 		protected void onPostExecute(Boolean r)
 		{
-			if(callback != null && r != null)
-				callback.onResult(r);
+			final Callback c = callback.get();
+			if(c != null && r != null)
+				c.onResult(r);
 		}
 		
 	}
