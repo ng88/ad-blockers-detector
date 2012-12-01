@@ -75,7 +75,8 @@ public class AdBlockersDetector
 		/** The used method */
 		public Method method;
 		/** Details, depending on method */
-		public String details;
+		public String details1;
+		public String details2;
 	}
 
 
@@ -111,7 +112,8 @@ public class AdBlockersDetector
 		if(info != null)
 		{
 			info.method = Method.NONE;
-			info.details = "";
+			info.details1 = "";
+			info.details2 = "";
 		}
 		return  detectAppNames(info) ||
 				detectHostName(info) ||
@@ -131,27 +133,37 @@ public class AdBlockersDetector
 	
 	private boolean detectInHostFile(Info info)
 	{
-		File host = new File(HOST_FILE);
-		if(!host.canRead())
-		    host = new File(SYS_HOST_FILE);
-		if(host.canRead())
+	    // search a readable hosts file
+		File hostsFile = null;
+		for(final String fileName : HOSTS_FILES)
+		{
+		    hostsFile = new File(fileName);
+		    if(hostsFile.canRead())
+		        break;
+		}
+		// and read it
+		if(hostsFile != null && hostsFile.canRead())
 		{
 			BufferedReader in = null;
 			try
 			{
-				in = new BufferedReader(new FileReader(host));
+				in = new BufferedReader(new FileReader(hostsFile));
 				String ln;
 				while( (ln = in.readLine()) != null )
 				{
-					if(ln.contains(HOST_AD_PATTERN))
-					{
-						if(info != null)
-						{
-							info.method = Method.BY_HOSTS_FILE;
-							info.details = ln;
-						}
-						return true;
-					}
+				    for(final String pattern : HOSTS_FILE_PATTERNS)
+				    {
+				        if(ln.contains(pattern))
+				        {
+				            if(info != null)
+				            {
+				                info.method = Method.BY_HOSTS_FILE;
+				                info.details1 = hostsFile.getAbsolutePath();
+				                info.details2 = ln;
+				            }
+				            return true;
+				        }
+				    }
 				}
 			}
 			catch(Exception e)
@@ -173,7 +185,7 @@ public class AdBlockersDetector
 
 	private boolean detectHostName(Info info)
 	{
-		for(final String h : HOSTS)
+		for(final String h : BLOCKED_HOSTS)
 		{
 			final String addr = isLocalHost(h);
 			if(addr != null)
@@ -181,7 +193,8 @@ public class AdBlockersDetector
 				if(info != null)
 				{
 					info.method = Method.BY_HOST_RESOLUTION;
-					info.details = h + " => " + addr;
+					info.details1 = h;
+					info.details2 = addr;
 				}
 				return true;
 			}
@@ -214,7 +227,7 @@ public class AdBlockersDetector
 					if(info != null)
 					{
 						info.method = Method.BY_APP_NAME;
-						info.details = app;
+						info.details1 = app;
 					}
 					return true;
 				}
@@ -235,12 +248,10 @@ public class AdBlockersDetector
 			return false;
 		}
 	}
-	
-	private static final String HOST_FILE = "/etc/hosts";
-	private static final String SYS_HOST_FILE = "/system/etc/hosts";
 
-	private static final String HOST_AD_PATTERN = "admob";
-	
+	/**
+	 * Name of known ad blockers
+	 */
 	private static final String[] BLOCKERS_APP_NAMES = 
 		{
 		 "de.ub0r.android.adBlock",
@@ -252,7 +263,10 @@ public class AdBlockersDetector
 		 "com.perlapps.MyInternetSecurity"
 		};
 	
-	private static final String[] HOSTS = 
+	/**
+	 * Name of known blocked hosts
+	 */
+	private static final String[] BLOCKED_HOSTS = 
 		{
 		 "a.admob.com",
 		 "mm.admob.com",
@@ -260,6 +274,24 @@ public class AdBlockersDetector
 		 "r.admob.com",
 		 "mmv.admob.com"
 		};
+	
+	/**
+	 * "hosts" file possible paths
+	 */
+    private static final String[] HOSTS_FILES = 
+        {
+         "/etc/host",
+         "/system/etc/hosts",
+         "/data/data/hosts"
+        };
+    
+    /**
+     * Pattern to search in hosts file
+     */
+    private static final String[] HOSTS_FILE_PATTERNS = 
+        {
+         "admob"
+        };
 	
 	private class DetectTask extends AsyncTask<Void, Void, Boolean>
 	{
