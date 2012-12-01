@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="quit">Quitter</string>
+    <string name="buy">Acheter</string>
+    <string name="contact_us">Contact</string>
+ 
+    <string name="contact_default_msg">Je ne comprends pas pourquoi ce message s\'affiche.</string>
+    
+    <string name="dlg_title">Détection anti pub</string>
+    <string name="dlg_default_text"><![CDATA[
+        Un <b>bloqueur de publicité</b> a été détecté sur votre terminal.<br>
+        Si vous ne comprenez pas pourquoi ce message s\'affiche, merci de nous contacter.<br>
+        <br>
+        Le développement de cette application est financé par la publicité, merci de désinstaller votre bloqueur de publicité pour continuer à l\'utiliser.<br>
+        <br>   
+    ]]></string>
+    <string name="dlg_default_text_buy"><![CDATA[
+        Ou bien vous pouvez cliquer sur <b>Acheter</b> pour utiliser cette application sans publicité.
+    ]]></string>
+    
+</resources>

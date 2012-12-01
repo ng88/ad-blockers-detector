@@ -21,14 +21,12 @@
 
 package fr.nghs.android.abd;
 
-import android.net.Uri;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.text.Html;
 import android.util.Log;
@@ -219,21 +217,20 @@ public class DialogBuilder
                             infoStr = " (" + info.method.ordinal() + "/" + info.details1 + ")";
                         else
                             infoStr = "";
-                        final Intent send = new Intent(Intent.ACTION_SENDTO);
-                        final String uriText =
-                                "mailto:" + Uri.encode(emailAddress) + 
-                                "?subject=" + Uri.encode(act.getString(R.string.dlg_title)) + 
-                                "&body=" + Uri.encode(act.getString(R.string.contact_default_msg) + infoStr);
-                        send.setData(Uri.parse(uriText));
-                        act.startActivity(Intent.createChooser(send, act.getString(R.string.contact_us)));
-                        quit();
+
+                        Tools.sendEMail(act, act.getString(R.string.contact_us),
+                                emailAddress,
+                                act.getString(R.string.dlg_title),
+                                act.getString(R.string.contact_default_msg) + infoStr);
+
+                        Tools.quitApplication();
                         break;
                     }
                 case BUTTON_BUY:
                     Log.w("ABD", "No listener defined.");
                     break;
                 case BUTTON_QUIT:
-                    quit();
+                    Tools.quitApplication();
                     break;
             }
         }
@@ -241,7 +238,7 @@ public class DialogBuilder
         @Override
         public void onCancel(DialogInterface dialog)
         {
-            quit();
+            Tools.quitApplication();
         }
 
         public final void setEmailAddress(String emailAddress)
@@ -255,10 +252,6 @@ public class DialogBuilder
         }
     }
 
-    private static final void quit()
-    {
-        System.runFinalizersOnExit(true);
-        System.exit(0);
-    }
+
 
 }
