@@ -280,7 +280,7 @@ public class AdBlockersDetector
 	 */
     private static final String[] HOSTS_FILES = 
         {
-         "/etc/host",
+         "/etc/hosts",
          "/system/etc/hosts",
          "/data/data/hosts"
         };
