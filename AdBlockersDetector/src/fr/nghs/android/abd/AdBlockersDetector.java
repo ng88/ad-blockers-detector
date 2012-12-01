@@ -131,7 +131,9 @@ public class AdBlockersDetector
 	
 	private boolean detectInHostFile(Info info)
 	{
-		final File host = new File(HOST_FILE);
+		File host = new File(HOST_FILE);
+		if(!host.canRead())
+		    host = new File(SYS_HOST_FILE);
 		if(host.canRead())
 		{
 			BufferedReader in = null;
@@ -235,6 +237,7 @@ public class AdBlockersDetector
 	}
 	
 	private static final String HOST_FILE = "/etc/hosts";
+	private static final String SYS_HOST_FILE = "/system/etc/hosts";
 
 	private static final String HOST_AD_PATTERN = "admob";
 	
@@ -243,7 +246,10 @@ public class AdBlockersDetector
 		 "de.ub0r.android.adBlock",
 		 "org.adblockplus.android",
 		 "com.bigtincan.android.adfree",
-		 "org.adaway"
+		 "org.adaway",
+		 "org.czzsunset.adblock",
+		 "com.pasvante.adblocker",
+		 "com.perlapps.MyInternetSecurity"
 		};
 	
 	private static final String[] HOSTS = 
@@ -269,8 +275,15 @@ public class AdBlockersDetector
 		@Override
 		protected Boolean doInBackground(Void... params)
 		{
-			info = new Info();
-			return detectAdBlockers(info);
+		    try
+		    {
+		        info = new Info();
+		        return detectAdBlockers(info);
+		    }
+		    catch(Throwable t)
+		    {
+		        return false;		        
+		    }
 		}
 		
 		@Override
