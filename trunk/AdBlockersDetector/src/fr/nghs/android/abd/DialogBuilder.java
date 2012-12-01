@@ -1,5 +1,5 @@
 /*
- * AdBlockersDetector.java
+ * DialogBuilder.java
  * 
  * Copyright (c) 2012, Nicolas GUILLAUME. All rights reserved.
  *
