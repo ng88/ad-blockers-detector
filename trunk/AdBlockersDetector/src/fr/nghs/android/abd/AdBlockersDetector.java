@@ -356,7 +356,14 @@ public class AdBlockersDetector
         "org.adaway",
         "org.czzsunset.adblock",
         "com.pasvante.adblocker",
-        "com.perlapps.MyInternetSecurity"
+        "com.perlapps.MyInternetSecurity",
+        "net.xdevelop.adblocker_t",
+        "net.xdevelop.adblocker",
+        "com.jrummy.apps.ad.blocker",
+        "com.atejapps.advanishlite",
+        "com.atejapps.advanish",
+        "pl.adblocker.free"
+        //com.hexview.android.netspector
         };
 
     /**
