@@ -25,8 +25,17 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
+import java.net.HttpURLConnection;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.ProxySelector;
+import java.net.URI;
+import java.net.URL;
+import java.util.List;
+
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
@@ -64,7 +73,9 @@ public class AdBlockersDetector
         /** Detected by installed app names */
         BY_APP_NAME,
         /** Detected by resolving host names */
-        BY_HOST_RESOLUTION;
+        BY_HOST_RESOLUTION,
+        /** Detected local proxy */
+        BY_LOCAL_PROXY;
     }
 
     /** 
@@ -81,6 +92,16 @@ public class AdBlockersDetector
 
 
     private WeakReference<Context> context;
+    /**
+     * True to allow networking (ie send HTTP, DNS requests...)
+     * Disabled by default to preserve battery & data usage.
+     */
+    private boolean allowNetworking = false;
+    /**
+     * True to detect local ad filtering proxy.
+     * Require allowNetworking == true.
+     */
+    private boolean detectLocalProxy = false;
 
     /**
      * @param c c can be null, in this case the method using package name is not used.
@@ -116,8 +137,9 @@ public class AdBlockersDetector
             info.details2 = "";
         }
         return  detectAppNames(info) ||
-                detectHostName(info) ||
-                detectInHostFile(info);
+        		(allowNetworking && detectHostName(info)) ||
+                detectInHostFile(info) ||
+                (allowNetworking && detectLocalProxy && detectLocalAdProxy(info));
     }
 
     /**
@@ -211,7 +233,7 @@ public class AdBlockersDetector
         try
         {
             final InetAddress a = InetAddress.getByName(hostName);
-            if(a.isAnyLocalAddress() || a.isLinkLocalAddress() || a.isLoopbackAddress())
+            if(a != null && (a.isAnyLocalAddress() || a.isLinkLocalAddress() || a.isLoopbackAddress()))
                 return a.getHostAddress();
         }
         catch(Exception ex)
@@ -251,6 +273,76 @@ public class AdBlockersDetector
         {
             return false;
         }
+    }
+
+    //TODO test me!
+    private boolean detectLocalAdProxy(Info info)
+    {
+    	boolean hasLocalProxy = false;
+    	String proxyAddr = "";
+    	final ProxySelector ps = ProxySelector.getDefault();
+    	if(ps != null)
+    	{
+    		final List<Proxy> proxies = ps.select(URI.create(HTTP_TEST_URLS[0]));
+    		if(proxies != null)
+    		{
+    			for(final Proxy p : proxies)
+    			{
+    				if(p != Proxy.NO_PROXY &&
+						p.type() == Proxy.Type.HTTP &&
+						p.address() instanceof InetSocketAddress)
+    				{
+    					final InetAddress isa = ((InetSocketAddress)p.address()).getAddress();
+    					if(isa.isLoopbackAddress() || isa.isAnyLocalAddress())
+    					{
+    						proxyAddr = isa.toString();
+    						hasLocalProxy = true;
+    						break;
+    					}
+    				}
+    			}
+    		}
+    	}
+ 
+    	if(hasLocalProxy)
+    	{
+    		for(final String u : HTTP_TEST_URLS)
+    		{
+    			if(httpAlmostNoContent(u))
+    			{
+    				info.method = Method.BY_LOCAL_PROXY;
+    				info.details1 = u;
+    				info.details2 = proxyAddr;
+    				return true;
+    			}
+    		}
+    	}
+    	return false;
+    }
+    
+    /**
+     * Return true if the content of url is < 4 bytes.
+     * @param url
+     * @return true if content < 4, false if content >= 4 or url unreachable
+     */
+    private boolean httpAlmostNoContent(String url)
+    {
+        try
+        {
+            final HttpURLConnection c = (HttpURLConnection)new URL(url).openConnection();
+            final int responseCode = c.getResponseCode();
+            if(200 <= responseCode && responseCode <= 399)
+            {
+            	final InputStream in = c.getInputStream();
+            	final boolean r = in.read(new byte[8]) < 4;
+            	in.close();
+            	return r;
+            }
+        }
+        catch(IOException exception)
+        {
+        }
+        return false;
     }
 
     /**
@@ -297,6 +389,14 @@ public class AdBlockersDetector
         "admob"
         };
 
+    /**
+     * URL that should normally more than 4 bytes of content
+     */
+    private static final String[] HTTP_TEST_URLS = 
+        {
+        "http://media.admob.com/sdk-core-v40.js"
+        };
+
     private class DetectTask extends AsyncTask<Void, Void, Boolean>
     {
 
@@ -331,4 +431,14 @@ public class AdBlockersDetector
         }
 
     }
+
+	public final boolean isNetworkingAllowed()
+	{
+		return allowNetworking;
+	}
+
+	public final void setNetworkingAllowed(boolean v)
+	{
+		allowNetworking = v;
+	}
 }
