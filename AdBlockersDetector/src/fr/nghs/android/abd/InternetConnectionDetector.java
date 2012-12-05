@@ -69,7 +69,6 @@ public class InternetConnectionDetector
         "www.baidu.com",
         "www.msn.com",
         "www.amazon.com",
-        "www.ebay.com",
         "www.wikipedia.org"
         };
 
