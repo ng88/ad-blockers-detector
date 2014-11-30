@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="quit">退出</string>
+    <string name="buy">购买</string>
+    <string name="contact_us">联系我们</string>
+ 
+    <string name="contact_default_msg">我不明白为什么我得到这个消息。</string>
+    
+    <string name="dlg_title">广告拦截器检测</string>
+    <string name="dlg_default_text"><![CDATA[一个<b>广告拦截器</ B>已检测到您的设备上。如果你不明白，为什么您收到此消息，请随时与我们联系。此应用程序支持广告，所以请您卸载广告拦截器才能使用它。]]></string>
+    <string name="dlg_default_text_buy"><![CDATA[或者，请点击<B>购买</ b>按钮来使用这个应用程序没有广告。]]></string>
+    
+</resources>

@@ -362,7 +362,8 @@ public class AdBlockersDetector
         "com.jrummy.apps.ad.blocker",
         "com.atejapps.advanishlite",
         "com.atejapps.advanish",
-        "pl.adblocker.free"
+        "pl.adblocker.free",
+        "de.resolution.blockit"
         //com.hexview.android.netspector
         };
 
@@ -375,7 +376,12 @@ public class AdBlockersDetector
         "mm.admob.com",
         "p.admob.com",
         "r.admob.com",
-        "mmv.admob.com"
+        "mmv.admob.com",
+        "aax-fe-sin.amazon-adsystem.com",
+        "rcm-na.amazon-adsystem.com",
+        "aax-us-east.amazon-adsystem.com",
+        "ir-na.amazon-adsystem.com",
+        "aax-eu.amazon-adsystem.com"
         };
 
     /**
@@ -393,7 +399,8 @@ public class AdBlockersDetector
      */
     private static final String[] HOSTS_FILE_PATTERNS = 
         {
-        "admob"
+        "admob",
+        "amazon-adsystem"
         };
 
     /**
