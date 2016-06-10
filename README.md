@@ -24,9 +24,11 @@ This library will be improved regularly to ensure a maximum ad blocker detection
 
 # Usage #
 ## Setup ##
-The easiest way to use this library is to check out the project source code from svn (in trunk/AdBlockersDetector, click on Source to get the full address) or to download a tarball (click on Download).
+The easiest way to use this library is to clone the source code or to download a tarball.
 
-Once you have the project, import it in your eclipse workspace and reference it in your application project (right click > Properties > Android > Library > Add).
+Once you have the project, import it in your Eclipse workspace and reference it in your application project (right click > Properties > Android > Library > Add).
+
+Note: There is an Android Studio/Gradle project in the master branch.
 
 ## Examples ##
 
