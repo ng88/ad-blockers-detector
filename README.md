@@ -23,10 +23,24 @@ To be done:
 This library will be improved regularly to ensure a maximum ad blocker detection rate.
 
 # Usage #
-## Setup ##
-The easiest way to use this library is to check out the project source code from svn (in trunk/AdBlockersDetector, click on Source to get the full address) or to download a tarball (click on Download).
+## Setup with Eclipse/ADT ##
+Please go to the legacy-eclipse-project branch for the Eclipse project and documentation.
 
-Once you have the project, import it in your eclipse workspace and reference it in your application project (right click > Properties > Android > Library > Add).
+## Setup with Android Studio/Gradle ##
+At first, you need to clone the source code or download a snapshot.
+You will get a adBlockersDetector folder which is a Gradle module.
+
+To use this module in your Android Studio project, simply add the following lines to your settings.gradle file:
+```
+include ':adBlockersDetector'
+project(':adBlockersDetector').projectDir = new File('<replace with correct path>/adBlockersDetector')
+```
+And in your build.gradle file:
+```
+dependencies {
+    compile project(':adBlockersDetector')
+}
+```
 
 ## Examples ##
 
