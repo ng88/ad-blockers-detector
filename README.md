@@ -185,5 +185,5 @@ private static final String[] HOSTS_FILE_PATTERNS =
 ```
 
 ## Adding translation ##
-Currently, text strings (used in the provided dialog for example) are translated in English & French.
+Currently, text strings (used in the provided dialog for example) are translated in English,Chinese & French.
 You can add support for your native language by adding a strings.xml file in res/values-xx.
