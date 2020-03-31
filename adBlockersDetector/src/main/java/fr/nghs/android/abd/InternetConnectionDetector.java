@@ -12,13 +12,13 @@ public class InternetConnectionDetector
     /**
     *  Asynchronous callback
     */
-    public static interface Callback
+    public interface Callback
     {
         /**
         * Called in the GUI thread when result is available.
         * @param isConnected true if connected to the Internet.
         */
-        public void onResult(boolean isConnected);
+        void onResult(boolean isConnected);
     }
 
     /**
@@ -43,7 +43,7 @@ public class InternetConnectionDetector
         return false;
     }
 
-    public static final boolean isReachable(String httpHost)
+    public static boolean isReachable(String httpHost)
     {
         try
         {
@@ -79,7 +79,7 @@ public class InternetConnectionDetector
 
         public DetectTask(Callback c)
         {
-            callback = new WeakReference<Callback>(c);
+            callback = new WeakReference<>(c);
         }
 
         @Override

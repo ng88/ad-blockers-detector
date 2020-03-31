@@ -51,20 +51,20 @@ public class AdBlockersDetector
     /**
      *  Asynchronous callback
      */
-    public static interface Callback
+    public interface Callback
     {
         /**
          * Called in the GUI thread when result is available.
-         * @param adBlockFound true if an ad blocker is installed.
+         * @param adBlockerFound true if an ad blocker is installed.
          * @param info on detected ad blocker.
          */
-        public void onResult(boolean adBlockerFound, Info info);
+        void onResult(boolean adBlockerFound, Info info);
     }
 
     /**
      *  Detection method
      */
-    public static enum Method
+    public enum Method
     {
         /** Not found */
         NONE,
@@ -75,7 +75,7 @@ public class AdBlockersDetector
         /** Detected by resolving host names */
         BY_HOST_RESOLUTION,
         /** Detected local proxy */
-        BY_LOCAL_PROXY;
+        BY_LOCAL_PROXY
     }
 
     /** 
@@ -108,7 +108,7 @@ public class AdBlockersDetector
      */
     public AdBlockersDetector(Context c)
     {
-        context = new WeakReference<Context>(c);
+        context = new WeakReference<>(c);
     }
 
     /**
@@ -419,7 +419,7 @@ public class AdBlockersDetector
 
         public DetectTask(Callback c)
         {
-            callback = new WeakReference<Callback>(c);
+            callback = new WeakReference<>(c);
         }
 
         @Override

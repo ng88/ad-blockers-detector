@@ -31,7 +31,7 @@ public final class Tools
     /**
     * Quit the current application.
     */
-    public static final void quitApplication()
+    public static void quitApplication()
     {
         System.runFinalizersOnExit(true);
         System.exit(0);
@@ -40,7 +40,7 @@ public final class Tools
     /**
     * Propose user to send an email with pre-filled fields.
     */
-    public static final void sendEMail(final Context context, final String dialogTitle, final String to, final String subject, final String body)
+    public static void sendEMail(final Context context, final String dialogTitle, final String to, final String subject, final String body)
     {
         final Intent send = new Intent(Intent.ACTION_SENDTO);
         final String uriText =
@@ -56,7 +56,7 @@ public final class Tools
     * @param context
     * @param packageName package of the application to uninstall
     */
-    public static final void uinstallApplication(final Context context, final String packageName)
+    public static void uinstallApplication(final Context context, final String packageName)
     {
         final Intent intent = new Intent(Intent.ACTION_DELETE, Uri.fromParts("package", packageName, null));
         context.startActivity(intent);
